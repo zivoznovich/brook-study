@@ -82,11 +82,6 @@ button{cursor:pointer;background:none;border:none}
 .brand{font-family:var(--f-disp);font-weight:800;font-size:1.06rem;letter-spacing:-.03em;line-height:1.2}
 .brand small{display:block;font-family:var(--f-mono);font-weight:400;font-size:.62rem;
   letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
-.spacer{flex:1}
-.ring{width:38px;height:38px;flex:none;position:relative}
-.ring svg{transform:rotate(-90deg)}
-.ring b{position:absolute;inset:0;display:grid;place-items:center;
-  font-family:var(--f-mono);font-size:.58rem;font-weight:700;color:var(--ink-2)}
 
 /* ---------- layout ---------- */
 .wrap{max-width:62rem;margin:0 auto;padding:0 16px;min-width:0}
@@ -343,16 +338,6 @@ img{max-width:100%}
 <header class="top">
   <div class="top-in">
     <div class="brand">ידע נדרש<small>Brook Aviation</small></div>
-    <div class="spacer"></div>
-    <div class="ring" id="ring" title="התקדמות">
-      <svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true">
-        <circle cx="19" cy="19" r="16" fill="none" stroke="var(--line)" stroke-width="3"></circle>
-        <circle id="ringArc" cx="19" cy="19" r="16" fill="none" stroke="var(--accent)"
-                stroke-width="3" stroke-linecap="round" stroke-dasharray="100.5"
-                stroke-dashoffset="100.5"></circle>
-      </svg>
-      <b id="ringTxt">0%</b>
-    </div>
   </div>
   <div class="chips" id="chips"></div>
 </header>
@@ -413,7 +398,6 @@ const $ = s => document.querySelector(s);
 /* Session state only — ticks, known cards and quiz history last while the tab
    is open and are gone on reload. Nothing is written to the device. */
 const S = {known:{}, miss:{}, hit:{}, checks:{}};
-function save(){ paintRing(); }
 
 /* ---------- helpers ---------- */
 function hash(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return (h>>>0).toString(36); }
@@ -547,7 +531,7 @@ function paintChecks(){
 $('#readBody').addEventListener('change', e=>{
   const i = e.target.closest('input[data-ck]'); if(!i) return;
   if(i.checked) S.checks[i.dataset.ck] = 1; else delete S.checks[i.dataset.ck];
-  save(); paintChecks();
+  paintChecks();
 });
 $('#readBody').addEventListener('click', e=>{
   if(e.target.id === 'secAll'){
@@ -561,7 +545,7 @@ $('#readBody').addEventListener('click', e=>{
     document.querySelectorAll('#readBody input[data-ck]').forEach(i=>{
       i.checked = false; delete S.checks[i.dataset.ck];
     });
-    save(); paintChecks();
+    paintChecks();
   }
 });
 
@@ -571,15 +555,6 @@ $('#chips').innerHTML = CH.map((c,i)=>
 $('#chips').addEventListener('click', e=>{
   const b = e.target.closest('.chip'); if(b) renderChapter(+b.dataset.i);
 });
-
-/* ---------- progress ring ---------- */
-function paintRing(){
-  const known = CARDS.filter(c=>S.known[c.id]).length;
-  const pct = CARDS.length ? Math.round(known/CARDS.length*100) : 0;
-  $('#ringTxt').textContent = pct + '%';
-  $('#ringArc').style.strokeDashoffset = String(100.5 * (1 - pct/100));
-  $('#ringArc').style.strokeDasharray = '100.5';
-}
 
 /* ---------- flashcards ---------- */
 let deck = [], di = 0, flipped = false, onlyNew = false, scope = '*';
@@ -625,7 +600,7 @@ $('#cardStage').addEventListener('click', e=>{
   if(j){
     const c = deck[di];
     if(j.dataset.j === '1') S.known[c.id] = 1; else delete S.known[c.id];
-    save(); next(1); return;
+    next(1); return;
   }
   if(e.target.closest('#card') && !flipped){ flipped = true; drawCard(); }
 });
@@ -703,7 +678,6 @@ $('#quizStage').addEventListener('click', e=>{
   });
   if(ok){ right++; S.hit[q.id] = (S.hit[q.id]||0)+1; }
   else  { S.miss[q.id] = (S.miss[q.id]||0)+1; }
-  save();
   $('#qAfter').innerHTML = '<div class="q-src">'+markNums(esc(q.source))
     + '<br><b>'+esc(q.sec)+'</b></div>'
     + '<div class="judge" style="grid-template-columns:1fr"><button class="btn p" id="qNext">'
@@ -902,12 +876,7 @@ if(location.search.indexOf('debug') > -1){
 }
 
 /* ---------- boot ---------- */
-function redrawAll(){
-  renderChapter(curCh); paintRing();
-  if(deck.length) drawCard();
-}
 renderChapter(0);
-paintRing();
 runSearch('');
 document.querySelector('.tab').setAttribute('aria-current','true');
 })();

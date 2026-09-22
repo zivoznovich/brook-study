@@ -66,7 +66,7 @@ body{
   font-family:var(--f-body); font-size:16px; line-height:1.65;
   -webkit-text-size-adjust:100%; overflow-x:hidden;
   overflow-wrap:break-word; width:100%;
-  padding-bottom:calc(64px + clamp(4px, env(safe-area-inset-bottom), 20px));
+  padding-bottom:calc(58px + clamp(0px, env(safe-area-inset-bottom), 12px));
 }
 .t{unicode-bidi:plaintext}
 button,input{font:inherit;color:inherit}
@@ -295,15 +295,17 @@ select.btn{appearance:none;padding-inline-end:26px;
 
 /* ---------- tab bar ---------- */
 .tabs{position:fixed;inset-inline:0;bottom:0;z-index:50;background:var(--surface);
-  border-top:1px solid var(--line);display:flex;
-  padding-bottom:clamp(4px, env(safe-area-inset-bottom), 20px)}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
-  padding:8px 4px 5px;min-height:52px;color:var(--muted);transition:color .15s}
+  border-top:1px solid var(--line);display:flex;align-items:stretch;
+  /* installed to the home screen the indicator inset is ~34pt, which leaves a
+     dead band under the labels; reserve a little and split it evenly instead */
+  padding-top:5px;
+  padding-bottom:calc(5px + clamp(0px, env(safe-area-inset-bottom), 12px))}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:4px;min-height:44px;color:var(--muted);transition:color .15s}
 .tab svg{width:21px;height:21px}
 .tab span{font-size:.65rem;font-weight:500}
 .tab[aria-current="true"]{color:var(--accent)}
-.tab .dot{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:0}
-.tab[aria-current="true"] .dot{opacity:1}
+
 
 @media (min-width:760px){
   body{font-size:17px}
@@ -677,7 +679,7 @@ const TABS = [
 $('#tabs').innerHTML = TABS.map(([id,label,path])=>
   '<button class="tab" data-v="'+id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
   + 'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>'
-  + '<span>'+label+'</span><i class="dot"></i></button>').join('');
+  + '<span>'+label+'</span></button>').join('');
 
 function go(v){
   document.querySelectorAll('.view').forEach(s=> s.classList.toggle('on', s.id === 'v'+'-'+v));
